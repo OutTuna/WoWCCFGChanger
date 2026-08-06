@@ -1,0 +1,13 @@
+
+cmake-build-*/
+build/
+build-release/
+out/
+_deps/
+.idea/
+*.exe
+*.dll
+*.a
+*.o
+*.obj
+wowcfgchanger_meta.txt
