@@ -1,0 +1,15 @@
+build/
+build-release/
+out/
+cmake-build-*/
+_deps/
+.idea/
+*.exe
+*.dll
+*.a
+*.o
+*.obj
+wowcfgchanger_meta.txt
+Thumbs.db
+.DS_Store
+app_icon.png

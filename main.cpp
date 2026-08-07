@@ -5,11 +5,18 @@
 #include "app_state.h"
 #include "ui.h"
 #include "meta_store.h"
+#include "app_config.h"
+#include "utf8_utils.h"
+#include "texture_loader.h"
 #include "fonts/font_dejavu_sans.h"
+#include <cstring>
 
 static void GlfwErrorCallback(int error, const char* description) {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
+
+static const int kWindowWidth  = 1440;
+static const int kWindowHeight = 900;
 
 int main(int, char**) {
     glfwSetErrorCallback(GlfwErrorCallback);
@@ -18,11 +25,22 @@ int main(int, char**) {
     const char* glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_MAXIMIZED, GLFW_FALSE);
 
-    GLFWwindow* window = glfwCreateWindow(1280, 760, "WoW CFG Changer", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(kWindowWidth, kWindowHeight, "WoW CFG Changer", nullptr, nullptr);
     if (!window) return 1;
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
+
+    if (GLFWmonitor* monitor = glfwGetPrimaryMonitor()) {
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        if (mode) {
+            glfwSetWindowPos(window,
+                (mode->width  - kWindowWidth)  / 2,
+                (mode->height - kWindowHeight) / 2);
+        }
+    }
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -48,10 +66,26 @@ int main(int, char**) {
     }
 
     AppState state;
-
     MetaStore metaStore;
-    metaStore.Load(fs::current_path() / "wowcfgchanger_meta.txt");
+    metaStore.Load(Utf8::GetExeDir() / "wowcfgchanger_meta.txt");
     state.metaStore = &metaStore;
+
+    AppConfig appConfig;
+    appConfig.Load(Utf8::GetExeDir() / "wowcfgchanger_config.txt");
+    std::string savedPath = appConfig.GetLastRootPath();
+    if (!savedPath.empty()) {
+        std::strncpy(state.rootPathBuf, savedPath.c_str(), sizeof(state.rootPathBuf) - 1);
+    }
+    state.appConfig = &appConfig;
+
+    {
+        int texW = 0, texH = 0;
+        unsigned int tex = TextureLoader::LoadPngAsTexture(Utf8::GetExeDir() / "app_icon.png", texW, texH);
+        if (tex != 0) {
+            state.aboutIconTexture = tex;
+            state.aboutIconLoaded = true;
+        }
+    }
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();

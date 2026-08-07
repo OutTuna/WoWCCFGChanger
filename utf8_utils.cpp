@@ -32,15 +32,30 @@ fs::path Utf8ToPath(const std::string& utf8) {
     return fs::path(wide);
 }
 
+fs::path GetExeDir() {
+    wchar_t buf[MAX_PATH];
+    DWORD len = GetModuleFileNameW(nullptr, buf, MAX_PATH);
+    if (len == 0 || len == MAX_PATH) return fs::current_path();
+    return fs::path(buf).parent_path();
+}
+
 #else
 
-// Linux/macOS: native filesystem encoding is UTF-8 already.
-std::string PathToUtf8(const fs::path& p) {
+    std::string PathToUtf8(const fs::path& p) {
     return p.string();
 }
 
 fs::path Utf8ToPath(const std::string& utf8) {
     return fs::path(utf8);
+}
+
+fs::path GetExeDir() {
+#if defined(__linux__)
+    std::error_code ec;
+    fs::path self = fs::read_symlink("/proc/self/exe", ec);
+    if (!ec && !self.empty()) return self.parent_path();
+#endif
+    return fs::current_path();
 }
 
 #endif

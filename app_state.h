@@ -6,6 +6,7 @@
 namespace fs = std::filesystem;
 
 class MetaStore;
+class AppConfig;
 
 enum class Faction {
     Unknown = 0,
@@ -72,4 +73,9 @@ struct AppState {
     bool scanned = false;
 
     MetaStore* metaStore = nullptr;
+    AppConfig* appConfig = nullptr;
+    char rootPathBuf[512] = "";
+    unsigned int aboutIconTexture = 0;
+    bool aboutIconLoaded = false;
+    bool showAboutPopup = false;
 };

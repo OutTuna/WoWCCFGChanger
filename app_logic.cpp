@@ -100,4 +100,4 @@ bool CopyConfig(const CharacterInfo* srcChar,
     return true;
 }
 
-} // namespace AppLogic
+}

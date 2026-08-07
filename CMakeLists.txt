@@ -6,8 +6,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if (MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-
     add_compile_options(/utf-8)
+endif()
+
+if (WIN32)
+    enable_language(RC)
 endif()
 
 include(FetchContent)
@@ -46,7 +49,11 @@ add_executable(WowCFGChanger
     app_logic.cpp
     utf8_utils.cpp
     meta_store.cpp
+    diff_calc.cpp
+    app_config.cpp
+    texture_loader.cpp
     ${IMGUI_SOURCES}
+    $<$<PLATFORM_ID:Windows>:app.rc>
 )
 
 target_include_directories(WowCFGChanger PRIVATE
